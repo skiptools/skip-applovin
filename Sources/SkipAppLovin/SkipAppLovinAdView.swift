@@ -283,6 +283,7 @@ private struct WidthPreferenceKey: PreferenceKey {
 }
 
 public struct SkipAppLovinAdView: View {
+    @State private var uuid = UUID().uuidString
     let bannerAdUnitIdentifier: String
     let placement: String?
     let delegate: MAAdViewAdDelegate?
@@ -303,9 +304,9 @@ public struct SkipAppLovinAdView: View {
                     placement: placement,
                     delegate: delegate
                 )
-                    .id(adFormat) // rebuild AdView from scratch when the format changes
-                    .frame(height: adFormat.adaptiveSize(forWidth: width).height)
-                    .frame(maxWidth: .infinity)
+                .id("\(uuid)-\(adFormat)") // rebuild AdView from scratch when the format changes
+                .frame(height: adFormat.adaptiveSize(forWidth: width).height)
+                .frame(maxWidth: .infinity)
             } else {
                 Color.clear
                     .frame(maxWidth: .infinity)
@@ -333,6 +334,7 @@ public struct SkipAppLovinAdView: View {
 }
 
 public struct SkipAppLovinAdaptiveAdView: View {
+    @State private var uuid = UUID().uuidString
     let bannerAdUnitIdentifier: String
     let placement: String?
     let configuration: MAAdViewConfiguration
@@ -355,9 +357,9 @@ public struct SkipAppLovinAdaptiveAdView: View {
                     placement: placement,
                     delegate: delegate
                 )
-                    .id(adFormat) // rebuild AdView from scratch when the format changes
-                    .frame(height: adFormat.adaptiveSize(forWidth: width).height)
-                    .frame(maxWidth: .infinity)
+                .id("\(uuid)-\(adFormat)") // rebuild AdView from scratch when the format changes
+                .frame(height: adFormat.adaptiveSize(forWidth: width).height)
+                .frame(maxWidth: .infinity)
             } else {
                 Color.clear
                     .frame(maxWidth: .infinity)
