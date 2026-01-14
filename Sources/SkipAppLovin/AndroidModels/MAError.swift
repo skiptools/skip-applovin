@@ -9,6 +9,8 @@
 #if SKIP
 import Foundation
 import com.applovin.mediation.MaxError
+import com.applovin.mediation.MaxAdWaterfallInfo
+import com.applovin.mediation.MaxAdFormat
 
 /// This enum contains various error codes that the SDK can return when a MAX ad fails to load or display.
 public enum MAErrorCode: Int {
@@ -68,7 +70,13 @@ public class MAError {
         self.message = maxError.getMessage() ?? ""
         self.mediatedNetworkErrorCode = maxError.getMediatedNetworkErrorCode()
         self.mediatedNetworkErrorMessage = maxError.getMediatedNetworkErrorMessage() ?? ""
-        self.waterfall = nil // TODO: Implement MAAdWaterfallInfo wrapper
+        
+        if let maxWaterfall = maxError.getWaterfall() {
+            self.waterfall = MAAdWaterfallInfo(maxWaterfall)
+        } else {
+            self.waterfall = nil
+        }
+        
         self.requestLatency = TimeInterval(maxError.getRequestLatencyMillis()) / 1000.0
     }
 }

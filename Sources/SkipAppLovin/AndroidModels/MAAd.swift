@@ -9,6 +9,8 @@
 #if SKIP
 import Foundation
 import com.applovin.mediation.MaxAd
+import com.applovin.mediation.MaxAdWaterfallInfo
+import com.applovin.mediation.nativeAds.MaxNativeAd
 
 // MARK: - MAAd
 
@@ -42,7 +44,17 @@ public class MAAd {
     public let placement: String?
     
     /// The underlying waterfall of ad responses.
-    public let waterfall: MAAdWaterfallInfo?
+    public var waterfall: MAAdWaterfallInfo? {
+        // MAAd references MAAdWaterfallInfo, which references MAAd, so we need to use a lazy property to avoid infinite recursion
+        if _waterfall == nil {
+            if let maxWaterfall = maxAd.getWaterfall() {
+                _waterfall = MAAdWaterfallInfo(maxWaterfall, parentAd: self)
+            }
+        }
+        return _waterfall
+    }
+    
+    private var _waterfall: MAAdWaterfallInfo?
     
     /// The latency of the mediation ad load request in seconds.
     public let requestLatency: TimeInterval
@@ -58,9 +70,9 @@ public class MAAd {
     
     private let maxAd: MaxAd
     
-    internal init(_ maxAd: MaxAd, format: MAAdFormat) {
+    internal init(_ maxAd: MaxAd) {
         self.maxAd = maxAd
-        self.format = format
+        self.format = MAAdFormat.fromMaxAdFormat(maxAd.getFormat())
         
         let sizeObj = maxAd.getSize()
         self.size = CGSize(width: Double(sizeObj.getWidth()), height: Double(sizeObj.getHeight()))
@@ -72,9 +84,14 @@ public class MAAd {
         self.revenue = maxAd.getRevenue()
         self.revenuePrecision = maxAd.getRevenuePrecision() ?? ""
         self.placement = maxAd.getPlacement()
-        self.waterfall = nil // TODO: Implement MAAdWaterfallInfo wrapper
+        
         self.requestLatency = TimeInterval(maxAd.getRequestLatencyMillis()) / 1000.0
-        self.nativeAd = nil // TODO: Implement MANativeAd wrapper
+        
+        if let maxNativeAd = maxAd.getNativeAd() {
+            self.nativeAd = MANativeAd(maxNativeAd)
+        } else {
+            self.nativeAd = nil
+        }
         self.DSPName = maxAd.getDspName()
         self.DSPIdentifier = maxAd.getDspId()
     }

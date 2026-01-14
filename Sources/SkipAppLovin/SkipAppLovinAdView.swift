@@ -114,8 +114,7 @@ class AdViewWrapperListener: MaxAdViewAdListener {
     override func onAdLoaded(maxAd: MaxAd) {
         logger.info("onAdLoaded \(maxAd)")
         guard let delegate = delegate else { return }
-        let format = MAAdFormat.fromMaxAdFormat(maxAd.getFormat())
-        let ad = MAAd(maxAd, format: format)
+        let ad = MAAd(maxAd)
         delegate.didLoad(ad)
     }
 
@@ -129,46 +128,40 @@ class AdViewWrapperListener: MaxAdViewAdListener {
     override func onAdDisplayFailed(ad: MaxAd, error: MaxError) {
         logger.error("onAdDisplayFailed \(error)")
         guard let delegate = delegate else { return }
-        let format = MAAdFormat.fromMaxAdFormat(ad.getFormat())
-        let maAd = MAAd(ad, format: format)
+        let maAd = MAAd(ad)
         let maError = MAError(error)
         delegate.didFail(toDisplay: maAd, withError: maError)
     }
 
     override func onAdClicked(maxAd: MaxAd) {
         guard let delegate = delegate else { return }
-        let format = MAAdFormat.fromMaxAdFormat(maxAd.getFormat())
-        let ad = MAAd(maxAd, format: format)
+        let ad = MAAd(maxAd)
         delegate.didClick(ad)
     }
 
     override func onAdExpanded(maxAd: MaxAd) {
         guard let delegate = delegate else { return }
-        let format = MAAdFormat.fromMaxAdFormat(maxAd.getFormat())
-        let ad = MAAd(maxAd, format: format)
+        let ad = MAAd(maxAd)
         delegate.didExpand(ad)
     }
 
     override func onAdCollapsed(maxAd: MaxAd) {
         guard let delegate = delegate else { return }
-        let format = MAAdFormat.fromMaxAdFormat(maxAd.getFormat())
-        let ad = MAAd(maxAd, format: format)
+        let ad = MAAd(maxAd)
         delegate.didCollapse(ad)
     }
 
     override func onAdDisplayed(maxAd: MaxAd) {
         /* DO NOT USE - THIS IS RESERVED FOR FULLSCREEN ADS ONLY AND WILL BE REMOVED IN A FUTURE SDK RELEASE */
         guard let delegate = delegate else { return }
-        let format = MAAdFormat.fromMaxAdFormat(maxAd.getFormat())
-        let ad = MAAd(maxAd, format: format)
+        let ad = MAAd(maxAd)
         delegate.didDisplay(ad)
     }
 
     override func onAdHidden(maxAd: MaxAd) {
         /* DO NOT USE - THIS IS RESERVED FOR FULLSCREEN ADS ONLY AND WILL BE REMOVED IN A FUTURE SDK RELEASE */
         guard let delegate = delegate else { return }
-        let format = MAAdFormat.fromMaxAdFormat(maxAd.getFormat())
-        let ad = MAAd(maxAd, format: format)
+        let ad = MAAd(maxAd)
         delegate.didHide(ad)
     }
 }
