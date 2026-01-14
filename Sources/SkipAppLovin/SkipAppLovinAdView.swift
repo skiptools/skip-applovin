@@ -37,6 +37,7 @@ struct AppLovinAdViewWrapper: View {
     let adReviewDelegate: MAAdReviewDelegate?
     let extraParameters: [String: String]
     let localExtraParameters: [String: Any?]
+    let customData: String?
     
     init(
         bannerAdUnitIdentifier: String,
@@ -50,6 +51,7 @@ struct AppLovinAdViewWrapper: View {
         adReviewDelegate: MAAdReviewDelegate? = nil,
         extraParameters: [String: String] = [:],
         localExtraParameters: [String: Any?] = [:],
+        customData: String? = nil,
     ) {
         self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
         self.placement = placement
@@ -62,6 +64,7 @@ struct AppLovinAdViewWrapper: View {
         self.adReviewDelegate = adReviewDelegate
         self.extraParameters = extraParameters
         self.localExtraParameters = localExtraParameters
+        self.customData = customData
     }
     
     var body: some View {
@@ -85,6 +88,9 @@ struct AppLovinAdViewWrapper: View {
                 }
                 for (key, value) in localExtraParameters {
                     adView.setLocalExtraParameter(key, value)
+                }
+                if let customData {
+                    adView.setCustomData(customData)
                 }
                 let listener = AdViewWrapperListener(delegate: delegate, revenueDelegate: revenueDelegate, requestDelegate: requestDelegate, adReviewDelegate: adReviewDelegate)
                 adView.setListener(listener)
@@ -200,6 +206,7 @@ struct AppLovinAdViewWrapper: UIViewRepresentable {
     let adReviewDelegate: MAAdReviewDelegate?
     let extraParameters: [String: String]
     let localExtraParameters: [String: Any?]
+    let customData: String?
     
     init(
         bannerAdUnitIdentifier: String,
@@ -213,6 +220,7 @@ struct AppLovinAdViewWrapper: UIViewRepresentable {
         adReviewDelegate: MAAdReviewDelegate? = nil,
         extraParameters: [String: String] = [:],
         localExtraParameters: [String: Any?] = [:],
+        customData: String? = nil,
     ) {
         self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
         self.placement = placement
@@ -225,6 +233,7 @@ struct AppLovinAdViewWrapper: UIViewRepresentable {
         self.adReviewDelegate = adReviewDelegate
         self.extraParameters = extraParameters
         self.localExtraParameters = localExtraParameters
+        self.customData = customData
     }
     
     func makeUIView(context: Context) -> MAAdView
@@ -251,6 +260,9 @@ struct AppLovinAdViewWrapper: UIViewRepresentable {
         }
         for (key, value) in localExtraParameters {
             adView.setLocalExtraParameterForKey(key, value: value)
+        }
+        if let customData {
+            adView.customData = customData
         }
         // Set background color for banners to be fully functional
         adView.backgroundColor = backgroundColor
@@ -359,6 +371,7 @@ public struct SkipAppLovinAdView: View {
     let adReviewDelegate: MAAdReviewDelegate?
     let extraParameters: [String: String]
     let localExtraParameters: [String: Any?]
+    let customData: String?
     
     public init(
         bannerAdUnitIdentifier: String,
@@ -371,6 +384,7 @@ public struct SkipAppLovinAdView: View {
         adReviewDelegate: MAAdReviewDelegate? = nil,
         extraParameters: [String: String] = [:],
         localExtraParameters: [String: Any?] = [:],
+        customData: String? = nil,
     ) {
         self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
         self.adFormat = adFormat
@@ -382,6 +396,7 @@ public struct SkipAppLovinAdView: View {
         self.adReviewDelegate = adReviewDelegate
         self.extraParameters = extraParameters
         self.localExtraParameters = localExtraParameters
+        self.customData = customData
     }
     public var body: some View {
         AppLovinAdViewWrapper(
@@ -411,6 +426,7 @@ public struct SkipAppLovinFlexibleBannerAdView: View {
     let adReviewDelegate: MAAdReviewDelegate?
     let extraParameters: [String: String]
     let localExtraParameters: [String: Any?]
+    let customData: String?
     
     public init(
         bannerAdUnitIdentifier: String,
@@ -422,6 +438,7 @@ public struct SkipAppLovinFlexibleBannerAdView: View {
         adReviewDelegate: MAAdReviewDelegate? = nil,
         extraParameters: [String: String] = [:],
         localExtraParameters: [String: Any?] = [:],
+        customData: String? = nil,
     ) {
         self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
         self.configuration = configuration
@@ -432,7 +449,7 @@ public struct SkipAppLovinFlexibleBannerAdView: View {
         self.adReviewDelegate = adReviewDelegate
         self.extraParameters = extraParameters
         self.localExtraParameters = localExtraParameters
-        
+        self.customData = customData
     }
     @State var width: CGFloat? = nil
     @State var adFormat: MAAdFormat?
