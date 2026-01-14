@@ -64,19 +64,10 @@ struct AppLovinAdViewWrapper: View {
     let backgroundColor: Color
     let delegate: MAAdViewAdDelegate?
     
-    init(bannerAdUnitIdentifier: String, adFormat: MAAdFormat, placement: String?, backgroundColor: Color = .black, delegate: MAAdViewAdDelegate? = nil) {
+    init(bannerAdUnitIdentifier: String, adFormat: MAAdFormat? = nil, configuration: MAAdViewConfiguration? = nil, placement: String?, backgroundColor: Color = .black, delegate: MAAdViewAdDelegate? = nil) {
         self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
         self.placement = placement
         self.adFormat = adFormat
-        self.configuration = nil
-        self.backgroundColor = backgroundColor
-        self.delegate = delegate
-    }
-    
-    init(bannerAdUnitIdentifier: String, configuration: MAAdViewConfiguration, placement: String?, backgroundColor: Color = .black, delegate: MAAdViewAdDelegate? = nil) {
-        self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
-        self.placement = placement
-        self.adFormat = nil
         self.configuration = configuration
         self.backgroundColor = backgroundColor
         self.delegate = delegate
@@ -89,13 +80,12 @@ struct AppLovinAdViewWrapper: View {
         ComposeView { ctx in
             let color = backgroundColor.colorImpl().toArgb()
             AndroidView(factory: { ctx in
-                var adView: MaxAdView?
+                let adView: MaxAdView
                 if let adFormat {
-                    adView = MaxAdView(bannerAdUnitIdentifier, adFormat.maxAdFormat)
-                } else if let configuration {
-                    adView = MaxAdView(bannerAdUnitIdentifier, configuration.maxAdViewConfiguration)
+                    adView = MaxAdView(bannerAdUnitIdentifier, adFormat.maxAdFormat, configuration?.maxAdViewConfiguration)
+                } else {
+                    adView = MaxAdView(bannerAdUnitIdentifier, configuration?.maxAdViewConfiguration)
                 }
-                guard let adView else { fatalError() }
                 adView.setListener(AdViewWrapperListener(delegate: delegate))
                 adView.setBackgroundColor(color)
                 adView.loadAd()
@@ -178,32 +168,22 @@ struct AppLovinAdViewWrapper: UIViewRepresentable {
     let backgroundColor: UIColor
     let delegate: MAAdViewAdDelegate?
     
-    init(bannerAdUnitIdentifier: String, adFormat: MAAdFormat, placement: String?, backgroundColor: Color = .black, delegate: MAAdViewAdDelegate? = nil) {
+    init(bannerAdUnitIdentifier: String, adFormat: MAAdFormat? = nil, configuration: MAAdViewConfiguration? = nil, placement: String?, backgroundColor: Color = .black, delegate: MAAdViewAdDelegate? = nil) {
         self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
         self.placement = placement
         self.adFormat = adFormat
-        self.configuration = nil
-        self.backgroundColor = UIColor(backgroundColor)
-        self.delegate = delegate
-    }
-    
-    init(bannerAdUnitIdentifier: String, configuration: MAAdViewConfiguration, placement: String?, backgroundColor: Color = .black, delegate: MAAdViewAdDelegate? = nil) {
-        self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
-        self.placement = placement
-        self.adFormat = nil
         self.configuration = configuration
         self.backgroundColor = UIColor(backgroundColor)
         self.delegate = delegate
     }
-    func makeUIView(context: Context) -> AppLovinSDK.MAAdView
+    
+    func makeUIView(context: Context) -> MAAdView
     {
-        let adView: AppLovinSDK.MAAdView
+        let adView: MAAdView
         if let adFormat {
-            adView = AppLovinSDK.MAAdView(adUnitIdentifier: bannerAdUnitIdentifier, adFormat: adFormat)
-        } else if let configuration {
-            adView = AppLovinSDK.MAAdView(adUnitIdentifier: bannerAdUnitIdentifier, configuration: configuration)
+            adView = MAAdView(adUnitIdentifier: bannerAdUnitIdentifier, adFormat: adFormat, configuration: configuration)
         } else {
-            fatalError("Invalid initialization for AppLovinAdViewWrapper")
+            adView = MAAdView(adUnitIdentifier: bannerAdUnitIdentifier, configuration: configuration)
         }
         context.coordinator.delegate = delegate
         adView.delegate = context.coordinator
@@ -219,7 +199,7 @@ struct AppLovinAdViewWrapper: UIViewRepresentable {
         return adView
     }
     
-    func updateUIView(_ uiView: AppLovinSDK.MAAdView, context: Context) {}
+    func updateUIView(_ uiView: MAAdView, context: Context) {}
     
     func makeCoordinator() -> Coordinator
     {
@@ -228,46 +208,46 @@ struct AppLovinAdViewWrapper: UIViewRepresentable {
 }
 
 extension AppLovinAdViewWrapper {
-    class Coordinator: NSObject, AppLovinSDK.MAAdViewAdDelegate
+    class Coordinator: NSObject, MAAdViewAdDelegate
         {
             weak var delegate: MAAdViewAdDelegate?
             
             // MARK: MAAdDelegate Protocol
             
-            func didLoad(_ ad: AppLovinSDK.MAAd) {
+            func didLoad(_ ad: MAAd) {
                 delegate?.didLoad(ad)
             }
             
-            func didFailToLoadAd(forAdUnitIdentifier adUnitIdentifier: String, withError error: AppLovinSDK.MAError) {
+            func didFailToLoadAd(forAdUnitIdentifier adUnitIdentifier: String, withError error: MAError) {
                 delegate?.didFailToLoadAd(forAdUnitIdentifier: adUnitIdentifier, withError: error)
             }
             
-            func didClick(_ ad: AppLovinSDK.MAAd) {
+            func didClick(_ ad: MAAd) {
                 delegate?.didClick(ad)
             }
             
-            func didFail(toDisplay ad: AppLovinSDK.MAAd, withError error: AppLovinSDK.MAError) {
+            func didFail(toDisplay ad: MAAd, withError error: MAError) {
                 delegate?.didFail(toDisplay: ad, withError: error)
             }
             
             // MARK: MAAdViewAdDelegate Protocol
             
-            func didExpand(_ ad: AppLovinSDK.MAAd) {
+            func didExpand(_ ad: MAAd) {
                 delegate?.didExpand(ad)
             }
             
-            func didCollapse(_ ad: AppLovinSDK.MAAd) {
+            func didCollapse(_ ad: MAAd) {
                 delegate?.didCollapse(ad)
             }
             
             // MARK: Deprecated Callbacks
             
-            func didDisplay(_ ad: AppLovinSDK.MAAd) {
+            func didDisplay(_ ad: MAAd) {
                 /* use this for impression tracking */
                 delegate?.didDisplay(ad)
             }
             
-            func didHide(_ ad: AppLovinSDK.MAAd) {
+            func didHide(_ ad: MAAd) {
                 /* DO NOT USE - THIS IS RESERVED FOR FULLSCREEN ADS ONLY AND WILL BE REMOVED IN A FUTURE SDK RELEASE */
                 delegate?.didHide(ad)
             }
