@@ -14,14 +14,14 @@ public class MAAdFormat: CustomStringConvertible {
     // MARK: - Static Ad Formats
     
     /// Represents a 320×50 banner advertisement.
-    static let banner = MAAdFormat(
+    public static let banner = MAAdFormat(
         label: "BANNER",
         size: CGSize(width: 320, height: 50),
         maxAdFormat: MaxAdFormat.BANNER
     )
     
     /// Represents a 300×250 rectangular advertisement.
-    static let mrec = MAAdFormat(
+    public static let mrec = MAAdFormat(
         label: "MREC",
         size: CGSize(width: 300, height: 250),
         maxAdFormat: MaxAdFormat.MREC
@@ -29,14 +29,14 @@ public class MAAdFormat: CustomStringConvertible {
     
     /// Represents a 728×90 leaderboard advertisement
     /// (for tablets).
-    static let leader = MAAdFormat(
+    public static let leader = MAAdFormat(
         label: "LEADER",
         size: CGSize(width: 728, height: 90),
         maxAdFormat: MaxAdFormat.LEADER
     )
     
     /// Represents a full-screen advertisement.
-    static let interstitial = MAAdFormat(
+    public static let interstitial = MAAdFormat(
         label: "INTER",
         size: .zero,
         maxAdFormat: MaxAdFormat.INTERSTITIAL
@@ -44,7 +44,7 @@ public class MAAdFormat: CustomStringConvertible {
     
     /// Similar to `interstitial`, except that it is shown
     /// upon opening the app.
-    static let appOpen = MAAdFormat(
+    public static let appOpen = MAAdFormat(
         label: "APP_OPEN",
         size: .zero,
         maxAdFormat: MaxAdFormat.APP_OPEN
@@ -52,14 +52,14 @@ public class MAAdFormat: CustomStringConvertible {
     
     /// Similar to `interstitial` except that users are given
     /// a reward at the end of the advertisement.
-    static let rewarded = MAAdFormat(
+    public static let rewarded = MAAdFormat(
         label: "REWARDED",
         size: .zero,
         maxAdFormat: MaxAdFormat.REWARDED
     )
     
     /// Represents a native advertisement.
-    static let native = MAAdFormat(
+    public static let native = MAAdFormat(
         label: "NATIVE",
         size: .zero,
         maxAdFormat: MaxAdFormat.NATIVE
@@ -68,7 +68,7 @@ public class MAAdFormat: CustomStringConvertible {
     /// Rewarded interstitial ads have been removed and this
     /// property will be removed in a future SDK version.
     @available(*, deprecated, message: "Rewarded interstitial ads have been removed and this property will be removed in a future SDK version.")
-    static let rewardedInterstitial = MAAdFormat(
+    public static let rewardedInterstitial = MAAdFormat(
         label: "REWARDED_INTER",
         size: .zero,
         maxAdFormat: MaxAdFormat.REWARDED_INTERSTITIAL
@@ -79,7 +79,7 @@ public class MAAdFormat: CustomStringConvertible {
     /// String representing the name of this ad format.
     /// Sample values include "BANNER", "MREC", "INTER",
     /// "REWARDED", etc.
-    let label: String
+    public let label: String
     
     /// The size of the AdView format ad, or CGSize.zero
     /// otherwise.
@@ -133,7 +133,7 @@ public class MAAdFormat: CustomStringConvertible {
     
     /// Whether or not the ad format is fullscreen: that is,
     /// an interstitial or rewarded.
-    var isFullscreenAd: Bool {
+    public var isFullscreenAd: Bool {
         return self === Self.interstitial ||
                self === Self.appOpen ||
                self === Self.rewarded ||
@@ -142,19 +142,19 @@ public class MAAdFormat: CustomStringConvertible {
     
     /// Whether or not the ad format is one of the following:
     /// a banner, leader, or MREC.
-    var isAdViewAd: Bool {
+    public var isAdViewAd: Bool {
         return self === Self.banner ||
                self === Self.leader ||
                self === Self.mrec
     }
     
     /// Whether or not the ad format is a banner or leader.
-    var isBannerOrLeaderAd: Bool {
+    public var isBannerOrLeaderAd: Bool {
         return self === Self.banner || self === Self.leader
     }
     
     /// Human-readable representation of the format.
-    var displayName: String {
+    public var displayName: String {
         switch self {
         case Self.banner:
             return "Banner"
@@ -177,7 +177,7 @@ public class MAAdFormat: CustomStringConvertible {
         }
     }
     
-    var description: String {
+    public var description: String {
         self.displayName
     }
     
