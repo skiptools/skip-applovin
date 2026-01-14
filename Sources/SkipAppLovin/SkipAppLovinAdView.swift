@@ -18,6 +18,7 @@ import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.MaxAdViewAdListener
 import com.applovin.mediation.MaxAdViewConfiguration
 import com.applovin.mediation.MaxError
+import androidx.compose.ui.graphics.toArgb
 
 // MARK: - Protocols
 
@@ -86,7 +87,7 @@ struct AppLovinAdViewWrapper: View {
             return EmptyView()
         }
         ComposeView { ctx in
-            //let color = backgroundColor.colorImpl().toArgb()
+            let color = backgroundColor.colorImpl().toArgb()
             AndroidView(factory: { ctx in
                 var adView: MaxAdView?
                 if let adFormat {
@@ -96,7 +97,7 @@ struct AppLovinAdViewWrapper: View {
                 }
                 guard let adView else { fatalError() }
                 adView.setListener(AdViewWrapperListener(delegate: delegate))
-                //adView.setBackground(backgroundColor.colorImpl().toArgb())
+                adView.setBackgroundColor(color)
                 adView.loadAd()
                 return adView
             }, modifier: ctx.modifier, update: { adView in })
