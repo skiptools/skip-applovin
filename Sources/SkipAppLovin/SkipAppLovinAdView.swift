@@ -14,6 +14,7 @@ let logger: Logger = Logger(subsystem: "SkipAppLovin", category: "SkipAppLovinAd
 import androidx.compose.ui.viewinterop.AndroidView
 
 import com.applovin.mediation.MaxAdViewAdListener
+import com.applovin.mediation.MaxAdViewConfiguration
 import com.applovin.mediation.MaxAdFormat
 import com.applovin.mediation.ads.MaxAdView
 import com.applovin.mediation.MaxAd
@@ -191,18 +192,156 @@ public class MAAdFormat: CustomStringConvertible {
     }
 }
 
+/// Defines the type of adaptive MAAdView.
+public enum MAAdViewAdaptiveType: Int {
+    /// Default type - standard banner/leader or MREC.
+    case none
+    
+    /// Adaptive ad view anchored to the screen. The MAX SDK
+    /// determines the height of the adaptive ad view by
+    /// invoking adaptiveSize(forWidth:) which results in a
+    /// height that ranges from 50 to 90 points but does not
+    /// exceed 15% of the screen height in the current
+    /// orientation.
+    case anchored
+    
+    /// Adaptive ad view embedded within scrollable content.
+    /// The height can extend up to the device height in the
+    /// current orientation unless you restrict it by setting
+    /// inlineMaximumHeight.
+    case inline
+}
 
+/// This class contains configurable fields for the MAAdView.
+public class MAAdViewConfiguration {
+    /// The adaptive type of the MAAdView. Defaults to
+    /// .none.
+    let adaptiveType: MAAdViewAdaptiveType
+    
+    /// The custom width, in points, for the adaptive
+    /// MAAdView. Defaults to -1, which indicates that the
+    /// width adapts to span the application window.
+    /// This value is only used when you set adaptiveType to
+    /// either .anchored or .inline.
+    let adaptiveWidth: CGFloat
+    
+    /// The maximum height, in points, for an inline adaptive
+    /// MAAdView. Defaults to -1, allowing the height to
+    /// extend up to the device height.
+    /// This value is only used when you set adaptiveType to
+    /// .inline.
+    let inlineMaximumHeight: CGFloat
+    
+    internal init(
+        adaptiveType: MAAdViewAdaptiveType,
+        adaptiveWidth: CGFloat,
+        inlineMaximumHeight: CGFloat
+    ) {
+        self.adaptiveType = adaptiveType
+        self.adaptiveWidth = adaptiveWidth
+        self.inlineMaximumHeight = inlineMaximumHeight
+    }
+    
+    var maxAdViewConfiguration: MaxAdViewConfiguration {
+        let maxAdaptiveType: MaxAdViewConfiguration.AdaptiveType
+        switch adaptiveType {
+        case .none:
+            maxAdaptiveType = MaxAdViewConfiguration.AdaptiveType.NONE
+        case .anchored:
+            maxAdaptiveType = MaxAdViewConfiguration.AdaptiveType.ANCHORED
+        case .inline:
+            maxAdaptiveType = MaxAdViewConfiguration.AdaptiveType.INLINE
+        }
+        let result = MaxAdViewConfiguration.builder()
+            .setAdaptiveType(maxAdaptiveType)
+            .setAdaptiveWidth(Int(adaptiveWidth))
+            .setInlineMaximumHeight(Int(inlineMaximumHeight))
+            .build()
+        return result
+    }
+    
+    // MARK: - Initialization
+    
+    /// Creates a MAAdViewConfiguration object constructed
+    /// from the MAAdViewConfigurationBuilder block.
+    /// You may modify the configuration from within the
+    /// block.
+    ///
+    /// - Parameter builderBlock: A closure that configures
+    ///   the builder.
+    /// - Returns: A MAAdViewConfiguration object.
+    public init(
+        withBuilderBlock builderBlock: (
+            MAAdViewConfigurationBuilder
+        ) -> Void
+    ) {
+        let builder = MAAdViewConfigurationBuilder()
+        builderBlock(builder)
+        self.adaptiveType = builder.adaptiveType
+        self.adaptiveWidth = builder.adaptiveWidth
+        self.inlineMaximumHeight = builder.inlineMaximumHeight
+    }
+}
+
+// MARK: - MAAdViewConfiguration Builder
+
+/// Builder class that you instantiate to create a
+/// MAAdViewConfiguration object before you create a
+/// MAAdView. This class contains properties that you can set
+/// to configure the properties of the MAAdView that results
+/// from the configuration object this class builds.
+public class MAAdViewConfigurationBuilder {
+    /// The adaptive type of the MAAdView. Defaults to
+    /// .none.
+    public var adaptiveType: MAAdViewAdaptiveType = .none
+    
+    /// The custom width, in points, for the adaptive
+    /// MAAdView. Must not exceed the width of the application
+    /// window.
+    public var adaptiveWidth: CGFloat = -1
+    
+    /// The custom maximum height, in points, for the inline
+    /// adaptive MAAdView.
+    /// Must be at least 32 points and no more than the device
+    /// height in the current orientation. A minimum of 50
+    /// points is recommended.
+    public var inlineMaximumHeight: CGFloat = -1
+    
+    // MARK: - Build
+    
+    /// Builds a MAAdViewConfiguration object from the builder
+    /// properties' values.
+    ///
+    /// - Returns: A MAAdViewConfiguration object.
+    func build() -> MAAdViewConfiguration {
+        return MAAdViewConfiguration(
+            adaptiveType: adaptiveType,
+            adaptiveWidth: adaptiveWidth,
+            inlineMaximumHeight: inlineMaximumHeight
+        )
+    }
+}
 
 struct AppLovinAdViewWrapper: View {
     let bannerAdUnitIdentifier: String
     let placement: String?
-    let adFormat: MAAdFormat
+    let adFormat: MAAdFormat?
+    let configuration: MAAdViewConfiguration?
     let backgroundColor: Color
     
     init(bannerAdUnitIdentifier: String, adFormat: MAAdFormat, placement: String?, backgroundColor: Color = .black) {
         self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
         self.placement = placement
         self.adFormat = adFormat
+        self.configuration = nil
+        self.backgroundColor = backgroundColor
+    }
+    
+    init(bannerAdUnitIdentifier: String, configuration: MAAdViewConfiguration, placement: String?, backgroundColor: Color = .black) {
+        self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
+        self.placement = placement
+        self.adFormat = nil
+        self.configuration = configuration
         self.backgroundColor = backgroundColor
     }
     
@@ -213,7 +352,13 @@ struct AppLovinAdViewWrapper: View {
         ComposeView { ctx in
             //let color = backgroundColor.colorImpl().toArgb()
             AndroidView(factory: { ctx in
-                let adView = MaxAdView(bannerAdUnitIdentifier, adFormat.maxAdFormat)
+                var adView: MaxAdView?
+                if let adFormat {
+                    adView = MaxAdView(bannerAdUnitIdentifier, adFormat.maxAdFormat)
+                } else if let configuration {
+                    adView = MaxAdView(bannerAdUnitIdentifier, configuration.maxAdViewConfiguration)
+                }
+                guard let adView else { fatalError() }
                 adView.setListener(AdViewWrapperListener())
                 //adView.setBackground(backgroundColor.colorImpl().toArgb())
                 adView.loadAd()
@@ -254,17 +399,36 @@ import AppLovinSDK
 struct AppLovinAdViewWrapper: UIViewRepresentable {
     let bannerAdUnitIdentifier: String
     let placement: String?
-    let adFormat: MAAdFormat
+    let adFormat: MAAdFormat?
+    let configuration: MAAdViewConfiguration?
     let backgroundColor: UIColor
     init(bannerAdUnitIdentifier: String, adFormat: MAAdFormat, placement: String?, backgroundColor: Color = .black) {
         self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
         self.placement = placement
         self.adFormat = adFormat
+        self.configuration = nil
+        self.backgroundColor = UIColor(backgroundColor)
+    }
+    init(bannerAdUnitIdentifier: String, configuration: MAAdViewConfiguration, placement: String?, backgroundColor: Color = .black) {
+        self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
+        self.placement = placement
+        self.adFormat = nil
+        self.configuration = configuration
         self.backgroundColor = UIColor(backgroundColor)
     }
     func makeUIView(context: Context) -> MAAdView
     {
-        let adView = MAAdView(adUnitIdentifier:  bannerAdUnitIdentifier, adFormat: adFormat)
+        let config = MAAdViewConfiguration { builder in
+            builder.adaptiveType = .anchored
+        }
+        let adView: MAAdView
+        if let adFormat {
+            adView = MAAdView(adUnitIdentifier:  bannerAdUnitIdentifier, adFormat: adFormat)
+        } else if let configuration {
+            adView = MAAdView(adUnitIdentifier:  bannerAdUnitIdentifier, configuration: configuration)
+        } else {
+            fatalError("Invalid initialization for AppLovinAdViewWrapper")
+        }
         adView.delegate = context.coordinator
         if let placement {
             adView.placement = placement
@@ -334,17 +498,18 @@ public struct SkipAppLovinAdView: View {
         self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
         self.placement = placement
     }
+    @State var width: CGFloat? = nil
     @State var adFormat: MAAdFormat?
     public var body: some View {
         Group {
-            if let adFormat {
+            if let adFormat, let width {
                 AppLovinAdViewWrapper(
                     bannerAdUnitIdentifier: bannerAdUnitIdentifier,
                     adFormat: adFormat,
                     placement: placement,
                 )
                     .id(adFormat) // rebuild AdView from scratch when the format changes
-                    .frame(height: adFormat.size.height)
+                    .frame(height: adFormat.adaptiveSize(forWidth: width).height)
                     .frame(maxWidth: .infinity)
             } else {
                 Color.clear
@@ -362,6 +527,7 @@ public struct SkipAppLovinAdView: View {
         .onPreferenceChange(WidthPreferenceKey.self) { availableWidth in
             logger.debug("availableWidth: \(String(describing: availableWidth))")
             guard let availableWidth else { return }
+            width = availableWidth
             let availableAdFormat: MAAdFormat = availableWidth >= MAAdFormat.leader.size.width ? .leader : .banner
             if availableAdFormat != adFormat {
                 logger.debug("updating adFormat to \(availableAdFormat)")
@@ -370,4 +536,53 @@ public struct SkipAppLovinAdView: View {
         }
     }
 }
+
+public struct SkipAppLovinAdaptiveAdView: View {
+    let bannerAdUnitIdentifier: String
+    let placement: String?
+    let configuration: MAAdViewConfiguration
+    public init(bannerAdUnitIdentifier: String, configuration: MAAdViewConfiguration, placement: String? = nil) {
+        self.bannerAdUnitIdentifier = bannerAdUnitIdentifier
+        self.configuration = configuration
+        self.placement = placement
+    }
+    @State var width: CGFloat? = nil
+    @State var adFormat: MAAdFormat?
+    public var body: some View {
+        Group {
+            if let adFormat, let width {
+                AppLovinAdViewWrapper(
+                    bannerAdUnitIdentifier: bannerAdUnitIdentifier,
+                    configuration: configuration,
+                    placement: placement,
+                )
+                    .id(adFormat) // rebuild AdView from scratch when the format changes
+                    .frame(height: adFormat.adaptiveSize(forWidth: width).height)
+                    .frame(maxWidth: .infinity)
+            } else {
+                Color.clear
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 1)
+            }
+        }
+        .background {
+            GeometryReader { proxy in
+                let _ = logger.debug("background \(proxy.size.width)")
+                Color.clear
+                    .preference(key: WidthPreferenceKey.self, value: proxy.size.width)
+            }
+        }
+        .onPreferenceChange(WidthPreferenceKey.self) { availableWidth in
+            logger.debug("availableWidth: \(String(describing: availableWidth))")
+            guard let availableWidth else { return }
+            width = availableWidth
+            let availableAdFormat: MAAdFormat = availableWidth >= MAAdFormat.leader.size.width ? .leader : .banner
+            if availableAdFormat != adFormat {
+                logger.debug("updating adFormat to \(availableAdFormat)")
+                adFormat = availableAdFormat
+            }
+        }
+    }
+}
+
 #endif
