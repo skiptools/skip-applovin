@@ -1,0 +1,93 @@
+//
+//  MAAd.swift
+//  skip-applovin
+//
+//  Created by Dan Fabulich on 1/13/26.
+//
+
+#if !SKIP_BRIDGE
+#if SKIP
+import Foundation
+import com.applovin.mediation.MaxAd
+
+// MARK: - MAAd
+
+/// This class represents an ad that has been served by AppLovin MAX.
+public class MAAd {
+    /// The format of this ad.
+    public let format: MAAdFormat
+    
+    /// The size of the AdView format ad, or CGSize.zero otherwise.
+    let size: CGSize
+    
+    /// The ad unit ID for which this ad was loaded.
+    public let adUnitIdentifier: String
+    
+    /// The ad network from which this ad was loaded.
+    public let networkName: String
+    
+    /// The ad network placement for which this ad was loaded.
+    public let networkPlacement: String
+    
+    /// The creative id tied to the ad, if any.
+    public let creativeIdentifier: String?
+    
+    /// The ad's revenue amount. In the case where no revenue amount exists, or it is not available yet, will return a value of 0.
+    public let revenue: Double
+    
+    /// The precision of the revenue value for this ad.
+    public let revenuePrecision: String
+    
+    /// The placement name that you assign when you integrate each ad format.
+    public let placement: String?
+    
+    /// The underlying waterfall of ad responses.
+    public let waterfall: MAAdWaterfallInfo?
+    
+    /// The latency of the mediation ad load request in seconds.
+    public let requestLatency: TimeInterval
+    
+    /// For Native ads only. Get an instance of the MANativeAd containing the assets used to render the native ad view.
+    public let nativeAd: MANativeAd?
+    
+    /// The DSP network that provided the loaded ad when the ad is served through AppLovin Exchange.
+    public let DSPName: String?
+    
+    /// The DSP id network that provided the loaded ad when the ad is served through AppLovin Exchange.
+    public let DSPIdentifier: String?
+    
+    private let maxAd: MaxAd
+    
+    internal init(_ maxAd: MaxAd, format: MAAdFormat) {
+        self.maxAd = maxAd
+        self.format = format
+        
+        let sizeObj = maxAd.getSize()
+        self.size = CGSize(width: Double(sizeObj.getWidth()), height: Double(sizeObj.getHeight()))
+        
+        self.adUnitIdentifier = maxAd.getAdUnitId() ?? ""
+        self.networkName = maxAd.getNetworkName() ?? ""
+        self.networkPlacement = maxAd.getNetworkPlacement() ?? ""
+        self.creativeIdentifier = maxAd.getCreativeId()
+        self.revenue = maxAd.getRevenue()
+        self.revenuePrecision = maxAd.getRevenuePrecision() ?? ""
+        self.placement = maxAd.getPlacement()
+        self.waterfall = nil // TODO: Implement MAAdWaterfallInfo wrapper
+        self.requestLatency = TimeInterval(maxAd.getRequestLatencyMillis()) / 1000.0
+        self.nativeAd = nil // TODO: Implement MANativeAd wrapper
+        self.DSPName = maxAd.getDspName()
+        self.DSPIdentifier = maxAd.getDspId()
+    }
+    
+    /// Gets the ad value for a given key.
+    public func adValue(forKey key: String) -> String? {
+        return maxAd.getAdValue(key)
+    }
+    
+    /// Gets the ad value for a given key.
+    public func adValue(forKey key: String, defaultValue: String?) -> String? {
+        return maxAd.getAdValue(key, defaultValue)
+    }
+}
+#endif
+#endif
