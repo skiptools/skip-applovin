@@ -1,0 +1,195 @@
+//
+//  MAInterstitialAd.swift
+//  skip-applovin
+//
+//  Created by Dan Fabulich on 1/13/26.
+//
+
+#if !SKIP_BRIDGE
+#if SKIP
+import SwiftUI
+import android.app.Activity
+import com.applovin.mediation.ads.MaxInterstitialAd
+import com.applovin.mediation.MaxAd
+import com.applovin.mediation.MaxAdListener
+import com.applovin.mediation.MaxError
+
+/// This class represents a full-screen interstitial ad.
+public class MAInterstitialAd {
+    /// A delegate that will be notified about ad events.
+    public weak var delegate: MAAdDelegate?
+    
+    /// A delegate that will be notified about ad revenue
+    /// events.
+    //weak var revenueDelegate: MAAdRevenueDelegate?
+    
+    /// A delegate that will be notified about ad request
+    /// events.
+    //weak var requestDelegate: MAAdRequestDelegate?
+    
+    /// A delegate that will be notified about ad expiration
+    /// events.
+    //weak var expirationDelegate: MAAdExpirationDelegate?
+    
+    /// A delegate that will be notified about Ad Review
+    /// events.
+    //weak var adReviewDelegate: MAAdReviewDelegate?
+    
+    /// The ad unit identifier this MAInterstitialAd was
+    /// initialized with and is loading ads for.
+    public var adUnitIdentifier: String {
+        ad.getAdUnitId()
+    }
+    
+    private let ad: MaxInterstitialAd
+    
+    /// Creates a new mediation interstitial.
+    ///
+    /// - Parameter adUnitIdentifier: Ad unit ID to load ads
+    ///   for.
+    public init(adUnitIdentifier: String) {
+        self.ad = MaxInterstitialAd(adUnitIdentifier)
+        ad.setListener(MaxAdListenerAdapter(self))
+    }
+    
+    /// Load the ad for the current interstitial. Set
+    /// delegate to assign a delegate that should be notified
+    /// about ad load state.
+    public func load() {
+        ad.loadAd()
+    }
+    
+    /// Show the loaded interstitial ad.
+    ///
+    /// - Use delegate to assign a delegate that should be
+    ///   notified about display events.
+    /// - Use isReady to check if an ad was successfully
+    ///   loaded.
+    public func show() {
+        show(forPlacement: nil)
+    }
+    
+    /// Show the loaded interstitial ad for a given placement
+    /// to tie ad events to.
+    ///
+    /// - Use delegate to assign a delegate that should be
+    ///   notified about display events.
+    /// - Use isReady to check if an ad was successfully
+    ///   loaded.
+    ///
+    /// - Parameter placement: The placement to tie the
+    ///   showing ad's events to.
+    public func show(forPlacement placement: String?) {
+        show(
+            forPlacement: placement,
+            customData: nil
+        )
+    }
+    
+    /// Show the loaded interstitial ad for a given placement
+    /// and custom data to tie ad events to.
+    ///
+    /// - Use delegate to assign a delegate that should be
+    ///   notified about display events.
+    /// - Use isReady to check if an ad was successfully
+    ///   loaded.
+    ///
+    /// - Parameters:
+    ///   - placement: The placement to tie the showing ad's
+    ///     events to.
+    ///   - customData: The custom data to tie the showing
+    ///     ad's events to. Maximum size is 8KB.
+    public func show(
+        forPlacement placement: String?,
+        customData: String?
+    ) {
+        show(
+            forPlacement: placement,
+            customData: customData,
+            activity: nil
+        )
+    }
+    
+    /// Show the loaded interstitial ad for a given placement
+    /// and custom data to tie ad events to, and a view
+    /// controller to present the ad from.
+    ///
+    /// - Use delegate to assign a delegate that should be
+    ///   notified about display events.
+    /// - Use isReady to check if an ad was successfully
+    ///   loaded.
+    ///
+    /// - Parameters:
+    ///   - placement: The placement to tie the showing ad's
+    ///     events to.
+    ///   - customData: The custom data to tie the showing
+    ///     ad's events to. Maximum size is 8KB.
+    ///   - activity: The activity to display
+    ///     the ad from. If nil, will be inferred
+    func show(
+        forPlacement placement: String?,
+        customData: String?,
+        activity: Activity?
+    ) {
+        let activity = activity ?? UIApplication.shared.androidActivity
+        ad.showAd(placement, customData, activity)
+    }
+    
+    /// Whether or not this ad is ready to be shown.
+    public var ready: Bool {
+        ad.isReady()
+    }
+    
+    /// Sets an extra key/value parameter for the ad.
+    ///
+    /// - Parameters:
+    ///   - key: Parameter key.
+    ///   - value: Parameter value.
+    func setExtraParameter(
+        key: String,
+        value: String?
+    ) {
+        ad.setExtraParameter(key, value)
+    }
+    
+    /// Set a local extra parameter to pass to the adapter
+    /// instances. Will not be available in the adapter's
+    /// initialization method.
+    ///
+    /// - Parameters:
+    ///   - key: Parameter key. Must not be null.
+    ///   - value: Parameter value. May be null.
+    func setLocalExtraParameter(
+        key: String,
+        value: Any?
+    ) {
+        ad.setLocalExtraParameter(key, value)
+    }
+}
+
+class MaxAdListenerAdapter: MaxAdListener {
+    weak var interstitialAd: MAInterstitialAd?
+    init(_ interstitialAd: MAInterstitialAd) {
+        self.interstitialAd = interstitialAd
+    }
+    override func onAdLoaded(_ ad: MaxAd) {
+        interstitialAd?.delegate?.didLoad(MAAd(ad))
+    }
+    override func onAdDisplayed(_ ad: MaxAd) {
+        interstitialAd?.delegate?.didDisplay(MAAd(ad))
+    }
+    override func onAdHidden(_ ad: MaxAd) {
+        interstitialAd?.delegate?.didHide(MAAd(ad))
+    }
+    override func onAdClicked(_ ad: MaxAd) {
+        interstitialAd?.delegate?.didClick(MAAd(ad))
+    }
+    override func onAdLoadFailed(_ adUnitIdentifier: String, error: MaxError) {
+        interstitialAd?.delegate?.didFailToLoadAd(forAdUnitIdentifier: adUnitIdentifier, withError: MAError(error))
+    }
+    override func onAdDisplayFailed(_ ad: MaxAd, error: MaxError) {
+        interstitialAd?.delegate?.didFail(toDisplay: MAAd(ad), withError: MAError(error))
+    }
+}
+#endif
+#endif
