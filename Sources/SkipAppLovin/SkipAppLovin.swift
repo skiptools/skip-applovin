@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
 
 #if !SKIP_BRIDGE
-import Foundation
+import SwiftUI
 import OSLog
 
 #if SKIP
@@ -267,6 +267,22 @@ public struct SkipAppLovin: @unchecked Sendable {
         }
         let sdkConfig = await ALSdk.shared().initialize(with: initConfig)
         return SkipALSdkConfiguration(sdkConfig)
+        #endif
+    }
+    
+    public func showMediationDebugger() {
+        #if SKIP
+        AppLovinSdk.getInstance( UIApplication.shared.androidActivity ).showMediationDebugger();
+        #else
+        ALSdk.shared().showMediationDebugger()
+        #endif
+    }
+    
+    public func showCreativeDebugger() {
+        #if SKIP
+        AppLovinSdk.getInstance( UIApplication.shared.androidActivity ).showCreativeDebugger();
+        #else
+        ALSdk.shared().showCreativeDebugger()
         #endif
     }
 }
