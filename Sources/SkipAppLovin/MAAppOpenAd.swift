@@ -66,7 +66,7 @@ public class MAAppOpenAd {
     ///
     /// - Use delegate to assign a delegate that should be
     ///   notified about display events.
-    /// - Use ready to check if an ad was successfully
+    /// - Use isReady to check if an ad was successfully
     ///   loaded.
     ///
     /// - Parameters:
@@ -88,7 +88,7 @@ public class MAAppOpenAd {
     }
     
     /// Whether or not this ad is ready to be shown.
-    public var ready: Bool {
+    public var isReady: Bool {
         ad.isReady()
     }
     

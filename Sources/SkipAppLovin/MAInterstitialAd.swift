@@ -145,7 +145,7 @@ public class MAInterstitialAd {
     }
     
     /// Whether or not this ad is ready to be shown.
-    public var ready: Bool {
+    public var isReady: Bool {
         ad.isReady()
     }
     
