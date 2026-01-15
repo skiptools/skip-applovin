@@ -52,9 +52,11 @@ public struct SkipAppLovin: @unchecked Sendable {
         exceptionHandlerEnabled: Bool? = nil
     ) async -> ALSdkConfiguration {
         #if SKIP
-        let builder = AppLovinSdkInitializationConfiguration.builder(sdkKey)
-        guard axonEventKey == nil else {
-            fatalError("axonEventKey not supported in SkipAppLovin")
+        let builder: AppLovinSdkInitializationConfiguration.Builder
+        if let axonEventKey {
+            builder = AppLovinSdkInitializationConfiguration.builder(sdkKey, axonEventKey)
+        } else {
+            builder = AppLovinSdkInitializationConfiguration.builder(sdkKey)
         }
         builder.setMediationProvider(mediationProvider)
         if let pluginVersion {
