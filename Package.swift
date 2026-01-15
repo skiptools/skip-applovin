@@ -11,12 +11,12 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://source.skip.tools/skip.git", from: "1.6.36"),
-        .package(url: "https://source.skip.tools/skip-foundation.git", from: "1.0.0"),
+        .package(url: "https://source.skip.tools/skip-ui.git", from: "1.0.0"),
         .package(url: "https://github.com/AppLovin/AppLovin-MAX-Swift-Package.git", from: "13.5.1"),
     ],
     targets: [
         .target(name: "SkipAppLovin", dependencies: [
-            .product(name: "SkipFoundation", package: "skip-foundation"),
+            .product(name: "SkipUI", package: "skip-ui"),
             .product(name: "AppLovinSDK", package: "AppLovin-MAX-Swift-Package", condition: .when(platforms: [.iOS, .tvOS]))
         ], resources: [.process("Resources")], plugins: [.plugin(name: "skipstone", package: "skip")]),
         .testTarget(name: "SkipAppLovinTests", dependencies: [
@@ -27,9 +27,9 @@ let package = Package(
 )
 
 if Context.environment["SKIP_BRIDGE"] ?? "0" != "0" {
-    package.dependencies += [.package(url: "https://source.skip.tools/skip-bridge.git", "0.0.0"..<"2.0.0")]
+    package.dependencies += [.package(url: "https://source.skip.tools/skip-fuse-ui.git", from: "1.0.0")]
     package.targets.forEach({ target in
-        target.dependencies += [.product(name: "SkipBridge", package: "skip-bridge")]
+        target.dependencies += [.product(name: "SkipFuseUI", package: "skip-fuse-ui")]
     })
     // all library types must be dynamic to support bridging
     package.products = package.products.map({ product in
