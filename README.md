@@ -18,6 +18,8 @@ There's no generated HTML API documentation for either library.
 Before attempting to load any ads, you'll need to initialize AppLovin with your SDK key, using `SkipAppLovin`, like this:
 
 ```swift
+import SkipAppLovin
+
 let YOUR_SDK_KEY = "..."
 let result = await SkipAppLovin.current.initialize(sdkKey: YOUR_SDK_KEY)
 ```
@@ -73,11 +75,6 @@ public struct ALPrivacySettings {
 Use them like this before initializing the SDK:
 
 ```swift
-import SkipAppLovin
-#if canImport(AppLovinSDK)
-import AppLovinSDK
-#endif
-
 ALPrivacySettings.setDoNotSell(true)
 ALPrivacySettings.setHasUserConsent(false)
 let result = await SkipAppLovin.current.initialize(sdkKey: YOUR_SDK_KEY)
@@ -197,9 +194,6 @@ The API is basically the same in all three cases:
 
 ```swift
 import SkipAppLovin
-#if canImport(AppLovinSDK)
-import AppLovinSDK
-#endif
 
 let interstitialAd = MAInterstitialAd(adUnitIdentifier: "YOUR_AD_UNIT_ID")
 interstitialAd.load()
