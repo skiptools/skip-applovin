@@ -189,7 +189,7 @@ class AdViewWrapperListener: MaxAdViewAdListener, MaxAdRevenueListener, MaxAdReq
 
 #elseif canImport(AppLovinSDK)
 // MARK: - iOS
-import AppLovinSDK
+@_exported import AppLovinSDK
 
 struct AppLovinAdViewWrapper: UIViewRepresentable {
     let bannerAdUnitIdentifier: String
