@@ -476,11 +476,11 @@ public struct SkipAppLovinFlexibleBannerAdView: View {
         self.localExtraParameters = localExtraParameters
         self.customData = customData
     }
-    @State var width: CGFloat? = nil
     @State var adFormat: MAAdFormat?
+    @State var adaptiveHeight: CGFloat? = nil
     public var body: some View {
         Group {
-            if let adFormat, let width {
+            if let adFormat, let adaptiveHeight {
                 AppLovinAdViewWrapper(
                     bannerAdUnitIdentifier: bannerAdUnitIdentifier,
                     adFormat: adFormat,
@@ -493,7 +493,7 @@ public struct SkipAppLovinFlexibleBannerAdView: View {
                     localExtraParameters: localExtraParameters,
                 )
                 .id("\(uuid)-\(adFormat)") // rebuild AdView from scratch when the format changes
-                .frame(height: adFormat.adaptiveSize(forWidth: width).height)
+                .frame(height: adaptiveHeight)
                 .frame(maxWidth: .infinity)
             } else {
                 Color.clear
@@ -501,21 +501,17 @@ public struct SkipAppLovinFlexibleBannerAdView: View {
                     .frame(height: 1)
             }
         }
-        .background {
-            GeometryReader { proxy in
-                let _ = logger.debug("background \(proxy.size.width)")
-                Color.clear
-                    .preference(key: WidthPreferenceKey.self, value: proxy.size.width)
-            }
-        }
-        .onPreferenceChange(WidthPreferenceKey.self) { availableWidth in
-            logger.debug("availableWidth: \(String(describing: availableWidth))")
-            guard let availableWidth else { return }
-            width = availableWidth
-            let availableAdFormat: MAAdFormat = availableWidth >= MAAdFormat.leader.size.width ? .leader : .banner
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+            logger.debug("width: \(width)")
+            let availableAdFormat: MAAdFormat = width >= MAAdFormat.leader.size.width ? .leader : .banner
             if availableAdFormat != adFormat {
                 logger.debug("updating adFormat to \(availableAdFormat)")
                 adFormat = availableAdFormat
+            }
+            let adaptiveHeight = availableAdFormat.adaptiveSize(forWidth: width).height
+            if adaptiveHeight != self.adaptiveHeight {
+                logger.debug("updating adaptiveHeight to \(adaptiveHeight)")
+                self.adaptiveHeight = adaptiveHeight
             }
         }
     }
