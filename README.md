@@ -316,5 +316,5 @@ which will output a table of the test results for both platforms.
 ## License
 
 This software is licensed under the
-[Mozilla Public License 2.0](https://www.mozilla.org/en-US/MPL/2.0/).
+[Mozilla Public License 2.0](https://www.mozilla.org/MPL/).
 
