@@ -10,7 +10,7 @@ import com.applovin.sdk.AppLovinSdk
 import com.applovin.sdk.AppLovinSdkInitializationConfiguration
 import androidx.compose.ui.platform.LocalContext
 #elseif canImport(AppLovinSDK)
-import AppLovinSDK
+@_exported import AppLovinSDK
 #endif
 
 #if SKIP || canImport(AppLovinSDK)
